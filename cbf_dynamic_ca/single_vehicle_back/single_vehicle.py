@@ -132,7 +132,7 @@ class Single_Vehicle_Model:
         relative_orientation = self.state[2] - self.target_state[2]
         H = sp.Matrix([[1.00, 0.00, 0.05], 
                        [0.00, 1.00, 0.05], 
-                       [0.05, 0.05, 0.32]])  # 0.26
+                       [0.05, 0.05, 0.45]])  # 0.26
         
         relative_state = sp.Matrix([relative_x, relative_y, relative_orientation])
         clf = (relative_state.T @ H @ relative_state)[0, 0]

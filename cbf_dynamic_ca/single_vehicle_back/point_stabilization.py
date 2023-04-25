@@ -19,13 +19,13 @@ class Point_Stabilization_Execute:
                     'u_max': [2.0, 1.5],
                     'u_min': [-2.0, -1.5],
                     'initial_state': [0.0, 0.0, 0.0],
-                    'target_state': [5.0, 4.0, 0.0],  # [5.0, 5.0, 0.0]
+                    'target_state': [5.0, 4.2, 0.0],  # [5.0, 5.0, 0.0]
                     'robot_radius': 0.25,
                     'l': 0.15,
                     # 'obstacle_list': [[3.0, 1.5, 0.7], [1.0, 3.0, 0.55]],
                     # 'obstacle_dynamics_list': [[0.0, 0.0], [0.0, 0.0]],
-                    'obstacle_list': [[3.5, 1.5, 0.7]],
-                    'obstacle_dynamics_list': [[-0.5, 0.0]],
+                    'obstacle_list': [[3.5, 1.5, 0.7], [5.0, 3.0, 0.6]],
+                    'obstacle_dynamics_list': [[-0.5, 0.0], [-0.5, 0.0]],
                     'margin': 0.05
                 }
         
@@ -186,17 +186,22 @@ class Point_Stabilization_Execute:
                                           color='k')
             self.ax.add_patch(self.obs[i])
 
-        self.ani = animation.FuncAnimation(self.fig,
-                                           func=self.animation_loop,
-                                           frames=self.terminal_time,
-                                           init_func=self.animation_init,
-                                           interval=200,
+        self.ani = animation.FuncAnimation(self.fig, 
+                                           func=self.animation_loop, 
+                                           frames=self.terminal_time, 
+                                           init_func=self.animation_init, 
+                                           interval=20, 
                                            repeat=False)
         plt.grid()
-        plt.show()
-        if False:
-            self.ani.save('./v1.gif', writer='imagemagick', fps=100)
 
+        # writergif = animation.PillowWriter(fps=30) 
+        # self.ani.save('pig.gif', writer=writergif)
+
+        # writer = animation.PillowWriter(fps=15, metadata=dict(artist='Me'), bitrate=1800)
+        # ani.save('scatter.gif', writer=writer)
+
+        plt.show()
+        
     def animation_init(self):
 
         # start position
@@ -396,8 +401,8 @@ if __name__ == '__main__':
     test_target.qp_solve_cbf_clf()
     
     test_target.render()
-    test_target.show_clf()
-    test_target.show_slack()
-    # test_target.show_cbf()
-    test_target.show_control()
+    # test_target.show_clf()
+    # test_target.show_slack()
+    # # test_target.show_cbf()
+    # test_target.show_control()
     
