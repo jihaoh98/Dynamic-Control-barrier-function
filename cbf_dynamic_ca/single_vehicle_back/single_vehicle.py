@@ -96,10 +96,12 @@ class Single_Vehicle_Model:
 
         # choose for a type of clf
         self.clf_symbolic = self.define_clf_cross_term()
+        # self.clf_symbolic = self.define_clf_rear()
         # self.clf_symbolic = self.define_clf_center()
         self.clf = lambdify([self.state, self.target_state], self.clf_symbolic)
 
         self.cbf_symbolic = self.define_cbf()
+        # self.cbf_symbolic = self.define_cbf_center()
         self.cbf = lambdify([self.robot_state, self.obstacle_state], self.cbf_symbolic)
 
         self.lie_derivatives_calculator()
@@ -111,6 +113,21 @@ class Single_Vehicle_Model:
         return f, g
     
     def define_clf_center(self):
+        """ 
+        define the clf with the center position of robot
+        x = x_p + l * cos(theta)
+        y = y_p + l * sin(theta)
+        """
+        H = sp.Matrix([[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 0.1]])
+        relative_x = self.state[0] - self.target_state[0]
+        relative_y = self.state[1] - self.target_state[1]
+        relative_orientation = self.state[2] - self.target_state[2]
+
+        relative_state = sp.Matrix([relative_x, relative_y, relative_orientation])
+        clf = (relative_state.T @ H @ relative_state)[0, 0]
+        return clf
+    
+    def define_clf_rear(self):
         """ 
         define the clf with the center position of robot represented by the rear 
         x = x_p + l * cos(theta)
@@ -132,7 +149,7 @@ class Single_Vehicle_Model:
         relative_orientation = self.state[2] - self.target_state[2]
         H = sp.Matrix([[1.00, 0.00, 0.05], 
                        [0.00, 1.00, 0.05], 
-                       [0.05, 0.05, 0.45]])  # 0.26
+                       [0.05, 0.05, 0.26]])  # 0.26 static # 0.45 dynamic
         
         relative_state = sp.Matrix([relative_x, relative_y, relative_orientation])
         clf = (relative_state.T @ H @ relative_state)[0, 0]
@@ -148,9 +165,16 @@ class Single_Vehicle_Model:
         self.dt_clf = lambdify([self.state, self.target_state], self.dt_clf_symbolic) 
 
     def define_cbf(self):
-
+        """ with rear axis """
         relative_x = self.robot_state[0] + self.l * sp.cos(self.robot_state[2]) - self.obstacle_state[0]
         relative_y = self.robot_state[1] + self.l * sp.sin(self.robot_state[2]) - self.obstacle_state[1]
+        cbf = relative_x ** 2 + relative_y ** 2 - (self.robot_state[3] + self.obstacle_state[2] + self.margin) ** 2
+        return cbf
+    
+    def define_cbf_center(self):
+        """ with center """
+        relative_x = self.robot_state[0] - self.obstacle_state[0]
+        relative_y = self.robot_state[1] - self.obstacle_state[1]
         cbf = relative_x ** 2 + relative_y ** 2 - (self.robot_state[3] + self.obstacle_state[2] + self.margin) ** 2
         return cbf
     

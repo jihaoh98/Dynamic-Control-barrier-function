@@ -19,13 +19,13 @@ class Point_Stabilization_Execute:
                     'u_max': [2.0, 1.5],
                     'u_min': [-2.0, -1.5],
                     'initial_state': [0.0, 0.0, 0.0],
-                    'target_state': [5.0, 4.2, 0.0],  # [5.0, 5.0, 0.0]
+                    'target_state': [5.0, 4.0, 0.0],  # static: [5.0, 4.0, 0.0] dynamic: [5.0, 4.2, 0.0]
                     'robot_radius': 0.25,
                     'l': 0.15,
-                    # 'obstacle_list': [[3.0, 1.5, 0.7], [1.0, 3.0, 0.55]],
-                    # 'obstacle_dynamics_list': [[0.0, 0.0], [0.0, 0.0]],
-                    'obstacle_list': [[3.5, 1.5, 0.7], [5.0, 3.0, 0.6]],
-                    'obstacle_dynamics_list': [[-0.5, 0.0], [-0.5, 0.0]],
+                    'obstacle_list': [[3.0, 1.5, 0.7], [1.0, 3.0, 0.55]],
+                    'obstacle_dynamics_list': [[0.0, 0.0], [0.0, 0.0]],
+                    # 'obstacle_list': [[3.5, 1.5, 0.7], [5.0, 3.0, 0.6]],
+                    # 'obstacle_dynamics_list': [[-0.5, 0.0], [-0.5, 0.0]],
                     'margin': 0.05
                 }
         
@@ -75,7 +75,7 @@ class Point_Stabilization_Execute:
         u = np.zeros(2)
         t = 0
         process_time = []
-        while np.linalg.norm(self.current_state - self.target_state) > 0.1 and t - self.time_steps < 0.0:
+        while np.linalg.norm(self.current_state - self.target_state) > 0.05 and t - self.time_steps < 0.0:
             if t % 100 == 0:
                 print(f't = {t}')
             
@@ -169,7 +169,7 @@ class Point_Stabilization_Execute:
 
         position_x = self.init_state[0] + self.l * np.cos(self.init_state[2])
         position_y = self.init_state[1] + self.l * np.sin(self.init_state[2])
-        self.robot_body = mpatches.Circle(xy=(position_x, position_y), radius=self.robot_radius, color='r')
+        self.robot_body = mpatches.Circle(xy=(position_x, position_y), radius=self.robot_radius, color='r')  # fill = False
         self.ax.add_patch(self.robot_body)
 
         self.robot_arrow = mpatches.Arrow(position_x,
@@ -195,10 +195,10 @@ class Point_Stabilization_Execute:
         plt.grid()
 
         # writergif = animation.PillowWriter(fps=30) 
-        # self.ani.save('pig.gif', writer=writergif)
+        # self.ani.save('.gif', writer=writergif)
 
-        # writer = animation.PillowWriter(fps=15, metadata=dict(artist='Me'), bitrate=1800)
-        # ani.save('scatter.gif', writer=writer)
+        writer = animation.PillowWriter(fps=15, metadata=dict(artist='Me'), bitrate=1800)
+        self.ani.save('static.gif', writer=writer)
 
         plt.show()
         
@@ -232,8 +232,7 @@ class Point_Stabilization_Execute:
                                            target_position_y,
                                            self.robot_radius * np.cos(self.target_state[2]),
                                            self.robot_radius * np.sin(self.target_state[2]),
-                                           width=0.15,
-                                           color='k')
+                                           width=0.15, color='k')
         self.ax.add_patch(self.target_arrow)
         self.target_arrow.set_zorder(1)
 
@@ -276,11 +275,11 @@ class Point_Stabilization_Execute:
         
             self.ax.plot(x_list, y_list, color='b',)
 
-            # past past trajecotry of each obstacle
+            # show past trajecotry of each obstacle
             for i in range(self.obstacle_num):
                 ox_list = [self.obstacle_list_t[i][:, indx - 1][0], self.obstacle_list_t[i][:, indx][0]]
                 oy_list = [self.obstacle_list_t[i][:, indx - 1][1], self.obstacle_list_t[i][:, indx][1]]
-                self.ax.plot(ox_list, oy_list, linestyle='--', color='k',)
+                self.ax.plot(ox_list, oy_list, color='k',)
 
         plt.savefig('figure/{}.png'.format(indx), format='png', dpi=300)
         return self.ax.patches + self.ax.texts + self.ax.artists
@@ -392,6 +391,64 @@ class Point_Stabilization_Execute:
         plt.show()
         plt.close(self.fig)
 
+    def show_control_v(self):
+        """show the changes in vover time"""
+        # set the label in Times New Roman and size
+        label_font = {'family': 'Times New Roman',
+                      'weight': 'normal',
+                      'size': 16,
+                      }
+        
+        # u_max and u_min
+        u_max = self.parameter['u_max']
+        t = np.arange(0, self.terminal_time / 10, self.step_time)
+
+        plt.plot(t, self.ut[0][0: self.terminal_time].reshape(self.terminal_time, ), linewidth=3, color='b', label="v")        
+        plt.plot(t, u_max[0] * np.ones(t.shape[0]), 'b--')
+        plt.plot(t, -u_max[0] * np.ones(t.shape[0]), 'b--')
+        
+        plt.title('Control Variable (v) ', label_font)
+        plt.xlabel('Time (s)', label_font)
+        plt.ylabel('v (m/s)', label_font)
+       
+        self.ax.tick_params(labelsize=16)
+        labels = self.ax.get_xticklabels() + self.ax.get_yticklabels()
+        [label.set_fontname('Times New Roman') for label in labels]
+        
+        plt.grid() 
+        plt.savefig('control_v.png', format='png', dpi=300)
+        plt.show()
+        plt.close(self.fig)
+
+    def show_control_w(self):
+        """show the changes in control over time"""
+        # set the label in Times New Roman and size
+        label_font = {'family': 'Times New Roman',
+                      'weight': 'normal',
+                      'size': 16,
+                      }
+        
+        # u_max and u_min
+        u_max = self.parameter['u_max']
+        t = np.arange(0, self.terminal_time / 10, self.step_time)
+
+        plt.plot(t, self.ut[1][0: self.terminal_time].reshape(self.terminal_time, ), linewidth=3, color='r', label="w")
+        plt.plot(t, u_max[1] * np.ones(t.shape[0]), 'r--')
+        plt.plot(t, -u_max[1] * np.ones(t.shape[0]), 'r--')
+        
+        plt.title('Control Variable (w)', label_font)
+        plt.xlabel('Time (s)', label_font)
+        plt.ylabel('w (rad/s)', label_font)
+       
+        self.ax.tick_params(labelsize=16)
+        labels = self.ax.get_xticklabels() + self.ax.get_yticklabels()
+        [label.set_fontname('Times New Roman') for label in labels]
+        
+        plt.grid() 
+        plt.savefig('control_w.png', format='png', dpi=300)
+        plt.show()
+        plt.close(self.fig)
+
     def storage_data(self):
         np.savez('process_data', x=self.xt, slack=self.slackt, cbf=self.cbf_t, clf=self.clf_t, u=self.ut)
 
@@ -401,6 +458,8 @@ if __name__ == '__main__':
     test_target.qp_solve_cbf_clf()
     
     test_target.render()
+    # test_target.show_control_v()
+    # test_target.show_control_w()
     # test_target.show_clf()
     # test_target.show_slack()
     # # test_target.show_cbf()
