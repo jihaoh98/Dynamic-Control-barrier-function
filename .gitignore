@@ -136,3 +136,6 @@ settings.json
 # Jihao Adds
 single_vehicle_center
 figure
+*.png
+*.jpg
+*.npz

@@ -35,12 +35,12 @@ class CBF_CLF_Qp:
         self.opti = ca.Opti()
         # solver
         opts_setting = {
-                'ipopt.max_iter': 100,
-                'ipopt.print_level': 0,
-                'print_time': 0,
-                'ipopt.acceptable_tol': 1e-8,
-                'ipopt.acceptable_obj_change_tol': 1e-6
-            }
+            'ipopt.max_iter': 100,
+            'ipopt.print_level': 0,
+            'print_time': 0,
+            'ipopt.acceptable_tol': 1e-8,
+            'ipopt.acceptable_obj_change_tol': 1e-6
+        }
         self.opti.solver('ipopt', opts_setting)
 
         # optimize variable
@@ -125,6 +125,7 @@ class CBF_CLF_Qp:
         self.opti.subject_to(lf_clf + (lg_clf @ self.u)[0, 0] + self.clf_lambda * clf - self.slack <= 0)
 
         # constraint for cbf: LfB + LgB * u + gamma * B  >= 0
+        cbf_list = []
         robot_state = [current_state[0], current_state[1], current_state[2], self.robot_radius]
         for i in range(len(obstacle_state_list)):
             cbf = self.cbf(robot_state, obstacle_state_list[i])
@@ -133,6 +134,7 @@ class CBF_CLF_Qp:
             
             dt_cbf = self.dt_cbf(current_state, obstacle_state_list[i], obstacle_dynamics_list[i])
             self.opti.subject_to(lf_cbf + (lg_cbf @ self.u)[0, 0] + dt_cbf + self.cbf_gamma * cbf >= 0)
+            cbf_list.append(cbf)
 
         # optimize the Qp problem
         try:
@@ -145,4 +147,4 @@ class CBF_CLF_Qp:
         optimal_control = sol.value(self.u)
         slack = sol.value(self.slack)
         
-        return optimal_control, slack, cbf, clf, self.feasible
+        return optimal_control, slack, cbf_list, clf, self.feasible
