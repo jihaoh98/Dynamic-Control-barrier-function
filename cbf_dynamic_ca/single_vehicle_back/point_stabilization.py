@@ -768,7 +768,7 @@ class Point_Stabilization_Execute:
             linewidth=6, color='#219EBC'
         )
        
-        plt.xlabel("时间(s)", fontproperties=label_font)
+        plt.xlabel("时间" + r'$(s)$', fontproperties=label_font)
         plt.ylabel("V(x)", fontproperties=times_font)
         plt.gca().xaxis.set_major_formatter(FormatStrFormatter('%.1f'))
         plt.gca().yaxis.set_major_formatter(FormatStrFormatter('%.1f'))
@@ -798,7 +798,7 @@ class Point_Stabilization_Execute:
             linewidth=6, color='#90C9E7'
         )
 
-        plt.xlabel("时间(s)", fontproperties=label_font)
+        plt.xlabel("时间" + r'$(s)$', fontproperties=label_font)
         plt.ylabel("δ", fontproperties=label_font)
         plt.gca().xaxis.set_major_formatter(FormatStrFormatter('%.1f'))
         plt.gca().yaxis.set_major_formatter(FormatStrFormatter('%.1f'))
@@ -834,8 +834,8 @@ class Point_Stabilization_Execute:
             linewidth=6, color=color_list[1]
         )
 
-        plt.xlabel("时间(s)", fontproperties=label_font)
-        plt.ylabel("距离(m) ", fontproperties=label_font)
+        plt.xlabel("时间" + r'$(s)$', fontproperties=label_font)
+        plt.ylabel("距离" + r'$(m)$', fontproperties=label_font)
         plt.gca().xaxis.set_major_formatter(FormatStrFormatter('%.1f'))
         plt.gca().yaxis.set_major_formatter(FormatStrFormatter('%.1f'))
         plt.legend(
@@ -874,8 +874,8 @@ class Point_Stabilization_Execute:
         v_smooth = np.convolve(v, np.ones(window_size) / window_size, mode='valid')
         w_smooth = np.convolve(w, np.ones(window_size) / window_size, mode='valid')
 
-        ax1.set_xlabel("时间(s)", fontproperties=label_font)
-        ax1.set_ylabel("线速度 v (m/s)", fontproperties=label_font)
+        ax1.set_xlabel("时间" + r'$(s)$', fontproperties=label_font)
+        ax1.set_ylabel("线速度" + r'$v (m / s)$', fontproperties=label_font)
         ax1.tick_params(axis='y')
 
         u_max = self.parameter['u_max']
@@ -889,7 +889,7 @@ class Point_Stabilization_Execute:
 
         ax2 = ax1.twinx()
         ax2.set_ylim(ax1.get_ylim())  
-        ax2.set_ylabel("角速度 w (rad/s)", fontproperties=label_font)
+        ax2.set_ylabel("角速度" + r'$w (rad / s)$', fontproperties=label_font)
         ax2.tick_params(axis='y')
         ax2.yaxis.set_major_formatter(FormatStrFormatter('%.1f'))
 
@@ -987,11 +987,11 @@ class Point_Stabilization_Execute:
         self.ut = data['u']
 
         # self.render()
-        # self.show_clf(name='static_clf.png')
-        # self.show_slack(name='static_slack.png')
-        # self.show_cbf(name='static_cbf.png')
-        # self.show_control(name='controls_static.png')
-        self.show_static_obs(index_t=[15, 30])
+        self.show_clf(name='static_clf.png')
+        self.show_slack(name='static_slack.png')
+        self.show_cbf(name='static_cbf.png')
+        self.show_control(name='controls_static.png')
+        # self.show_static_obs(index_t=[15, 30])
 
     def load_dynamic_data(self):
         data = np.load('dynamic.npz')
@@ -1007,18 +1007,18 @@ class Point_Stabilization_Execute:
         self.show_slack()
         self.show_cbf()
         self.show_control()
-        self.show_dynamic_obs([16, 38])
+        # self.show_dynamic_obs([16, 38])
 
 if __name__ == '__main__':
     test_target = Point_Stabilization_Execute()
     # test_target.qp_solve_clf()
-    test_target.qp_solve_cbf_clf()
+    # test_target.qp_solve_cbf_clf()
     
     # test_target.storage_data()
     # test_target.load_static_fail_data()
     # test_target.load_static_data()
-    # test_target.load_dynamic_data()
-    test_target.render()
+    test_target.load_dynamic_data()
+    # test_target.render()
     # test_target.show_control_v()
     # test_target.show_control_w()
     # test_target.show_clf()
